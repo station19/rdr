@@ -1,3 +1,30 @@
+```
+yum install golang -y
+
+cat >>/etc/profile<<EOF
+export GOROOT=/usr/lib/golang
+export GOPATH=\$HOME/go
+export PATH=\$PATH:\$GOROOT/bin
+EOF
+
+source /etc/profile
+
+#安装rdr redisdump解析工具
+
+cd $HOME/go
+go get github.com/xueqiu/rdr
+
+cd src/github.com/xueqiu/rdr
+
+#修改端口 8090为58080
+vim main.go
+
+Value: 58080,
+
+go build .
+```
+
+
 RDR: redis data reveal
 =================================================
 
