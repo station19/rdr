@@ -1,0 +1,62 @@
+#!/bin/bash
+. /etc/profile
+
+dumprdb_path="/data/software/redisdump"
+
+status(){
+        port_pid=`netstat -tlunp | grep ':58080' | awk  '{print $NF}' | awk -F '/' '{print $1}'`
+        if [ "$port_pid" = "" ]; then
+            echo -e "rdr已停止:\e[1;31m PID: $port_pid \e[0m"
+        else
+            echo -e "rdr已启动:\e[1;31m PID: $port_pid \e[0m"
+        fi
+}
+
+start(){
+        is_status_pid=`ps -eo pid,lstart,etime,cmd |grep -v grep| grep 'rdr show'|awk '{print $1}'`
+        if [ "$is_status_pid" != "" ]; then
+            echo -e "rdr已启动：\e[1;31m PID: $is_status_pid \e[0m"
+        else
+            echo -e "正在启动：\e[1;31m start rdr service \e[0m"
+            rdr show $dumprdb_path/* >>/dev/null 2>&1 &
+            sleep 8
+            port_pid=`netstat -tlunp | grep ':58080' | awk  '{print $NF}' | awk -F '/' '{print $1}'`
+            if [ "$port_pid" = "" ]; then
+                echo -e "rdr启动失败:\e[1;31m PID: $port_pid \e[0m"
+            else
+                echo -e "rdr已启动:\e[1;31m PID: $port_pid \e[0m"
+            fi
+        fi
+}
+
+stop(){
+        is_status_pid=`ps -eo pid,lstart,etime,cmd |grep -v grep| grep 'rdr show'|awk '{print $1}'`
+        if [ "$is_status_pid" = "" ]; then
+            echo -e "rdr已停止:\e[1;31m PID: $is_status_pid \e[0m"
+        else
+            echo -e "正在停止：\e[1;31m stop rdr service \e[0m"
+            netstat -tlunp | grep ':58080' | awk  '{print $NF}' | awk -F '/' '{print $1}'|xargs kill
+            sleep 3
+            port_pid=`netstat -tlunp | grep ':58080' | awk  '{print $NF}' | awk -F '/' '{print $1}'`
+            if [ "$port_pid" = "" ]; then
+                echo -e "rdr已停止:\e[1;31m PID: $port_pid \e[0m"
+            else
+                echo -e "rdr停止失败:\e[1;31m PID: $port_pid \e[0m"
+            fi
+        fi
+}
+
+restart(){
+        stop
+        start
+}
+
+help(){
+	echo "参数: $0"
+	echo "	start"
+	echo "	stop"
+	echo "	restart"
+	echo "	status"
+}
+$1
+
